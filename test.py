@@ -1,10 +1,7 @@
-#!/Library/Frameworks/Python.framework/Versions/3.9/bin/python3
-
 import unittest
 import numpy as np
 from helper import Helper
 from math import cos
-from typing import List
 from scipy.spatial.distance import cosine as cosine_distance
 
 class TestHelperMethods(unittest.TestCase):
