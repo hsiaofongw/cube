@@ -24,40 +24,44 @@ class Canvas:
         
         self.canvas_center = camera + canvas_distance * self.view_direction_norm
         self.canvas_norm = self.view_direction_norm
-        self.canvas_width_in_pixels = canvas_width_pixels
-        self.canvas_height_in_pixels = canvas_height_pixels
+        self.canvas_width_pixels = canvas_width_pixels
+        self.canvas_height_pixels = canvas_height_pixels
         
         cosine_of_canvas_base_line =  Helper.cosine(canvas_base_line, self.canvas_norm)
-        canvas_base_line += cosine_of_canvas_base_line * self.canvas_norm
+        self.canvas_base_line += cosine_of_canvas_base_line * self.canvas_norm
         
-        if (Helper.cosine(canvas_base_line, self.canvas_norm) - 1) > 1e-4:
-            canvas_base_line += (-2) * cosine_of_canvas_base_line * self.canvas_norm
+        if abs(Helper.cosine(canvas_base_line, self.canvas_norm) - 1) > 1e-4:
+            self.canvas_base_line += (-2) * cosine_of_canvas_base_line * self.canvas_norm
         
-        canvas_base_i = canvas_base_line
-        canvas_base_j = np.cross(self.canvas_base_i, self.canvas_norm)
-        
-        self.canvas_base_j = canvas_base_j/np.linalg.norm(canvas_base_j)
-        self.canvas_base_i = canvas_base_i/np.linalg.norm(canvas_base_i)
-        
-        self.canvas_left_arm = tan(view_angles_h[0]) * canvas_distance * self.canvas_base_i
-        self.canvas_right_arm = tan(view_angles_h[1]) * canvas_distance * self.canvas_base_i
-        self.canvas_top_arm = tan(view_angles_v[1]) * canvas_distance * self.canvas_base_j
-        self.canvas_bottom_arm = tan(view_angles_v[0]) * canvas_distance * self.canvas_base_j
-        
-        self.canvas_top_left_vertex = self.canvas_center + self.canvas_left_arm + self.canvas_top_arm
-        self.canvas_top_right_vertex = self.canvas_center + self.canvas_right_arm + self.canvas_top_arm
-        self.canvas_bottom_left_vertex = self.canvas_center + self.canvas_left_arm + self.canvas_bottom_arm
-        self.canvas_bottom_right_vertex = self.canvas_center + self.canvas_right_arm + self.canvas_bottom_arm
-        
-        self.baby_step_i = (self.canvas_top_right_vertex - self.canvas_top_left_vertex) / canvas_width_pixels
-        self.baby_step_j = (self.canvas_bottom_left_vertex - self.canvas_top_left_vertex) / canvas_height_pixels
-        
+    def get_pixel_points(self) -> np.ndarray:
+
+        canvas_base_i = self.canvas_base_line
+        canvas_base_j = np.cross(canvas_base_i, self.canvas_norm)
+        canvas_base_i = canvas_base_i/np.linalg.norm(canvas_base_i)
+        canvas_base_j = canvas_base_j/np.linalg.norm(canvas_base_j)
+
+        canvas_width_pixels = self.canvas_width_pixels
+        canvas_height_pixels = self.canvas_height_pixels
+
+        canvas_left_arm = tan(self.view_angles_h[0]) * self.canvas_distance * canvas_base_i
+        canvas_right_arm = tan(self.view_angles_h[1]) * self.canvas_distance * canvas_base_i
+        canvas_top_arm = tan(self.view_angles_v[1]) * self.canvas_distance * canvas_base_j
+        canvas_bottom_arm = tan(self.view_angles_v[0]) * self.canvas_distance * canvas_base_j
+
+        canvas_top_left_vertex = self.canvas_center + canvas_left_arm + canvas_top_arm
+        canvas_top_right_vertex = self.canvas_center + canvas_right_arm + canvas_top_arm
+        canvas_bottom_left_vertex = self.canvas_center + canvas_left_arm + canvas_bottom_arm
+
+        baby_step_i = (canvas_top_right_vertex - canvas_top_left_vertex) / canvas_width_pixels
+        baby_step_j = (canvas_bottom_left_vertex - canvas_top_left_vertex) / canvas_height_pixels
+
         canvas_pixel_points = np.zeros((canvas_width_pixels * canvas_height_pixels, 3,), dtype = np.float)
-        
         for row in range(canvas_width_pixels):
             for col in range(canvas_height_pixels):
                 i = row * canvas_height_pixels + col
-                canvas_pixel_points[i, :] = self.canvas_top_left_vertex + col * self.baby_step_j + row * self.baby_step_i
+                canvas_pixel_points[i, :] = canvas_top_left_vertex + col * baby_step_j + row * baby_step_i
+
         self.canvas_pixel_points = canvas_pixel_points
-        
-        self.view_vectors = self.canvas_pixel_points - camera
+    
+    def get_camera_point(self) -> np.ndarray:
+        return self.camera
