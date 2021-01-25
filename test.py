@@ -39,6 +39,19 @@ class TestHelperMethods(unittest.TestCase):
         eps = 1e-6
         self.assertAlmostEqual(mean_error, 0, delta=eps)
     
+    def test_projection(self):
+
+        n_dims = 3
+        vec_b = np.random.rand(n_dims)
+        vec_a = np.random.rand(n_dims)
+
+        vec_c = Helper.projection(vec_b, vec_a)
+
+        lhs = Helper.cosine(vec_b, vec_c)
+        rhs = 1.0
+        eps = 1e-6
+        self.assertAlmostEqual(lhs, rhs, delta=eps)
+    
     def test_rotate_one(self):
         point_p = np.random.rand(3)
         point_c = np.random.rand(3)
