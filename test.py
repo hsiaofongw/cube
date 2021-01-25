@@ -52,6 +52,20 @@ class TestHelperMethods(unittest.TestCase):
         eps = 1e-6
         self.assertAlmostEqual(lhs, rhs, delta=eps)
     
+    def test_vertical_line(self):
+
+        n_dims = 3
+        point_c = np.random.rand(n_dims)
+        point_a = np.random.rand(n_dims)
+        point_b = np.random.rand(n_dims)
+
+        vec_ca = point_a - point_c
+        vec_db = Helper.vertical_line(point_c, point_a, point_b)
+        lhs = Helper.cosine(vec_db, vec_ca)
+        rhs = 0.0
+        eps = 1e-6
+        self.assertAlmostEqual(lhs, rhs, delta=eps)
+    
     def test_rotate_one(self):
         point_p = np.random.rand(3)
         point_c = np.random.rand(3)
