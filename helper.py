@@ -73,7 +73,6 @@ class Helper:
         theta: float
     ) -> Tuple[np.ndarray, np.ndarray]:
         
-        vec_cp = point_p - point_c
         vec_dp = Helper.vertical_line(point_c, point_t, point_p)
         vec_i = vec_dp / np.linalg.norm(vec_dp)
         vec_ct = point_t - point_c
@@ -83,4 +82,110 @@ class Helper:
         point_p1 = point_p - vec_dp + vec_dp1
         
         return (vec_dp1, point_p1, )
+    
+    # input:
+    # 
+    # point_o: origin point
+    # v: direction of ray
+    #
+    # point_a: base point of geometry object
+    # point_b: second point of geometry object 
+    # point_c: third point of geometry object
+    #
+    # mat_Aeq: a matrix
+    # mat_Beq: a matrix
+    #
+    # mat_Aleq: a matrix
+    # mat_Bleq: a matrix
+    #
+    # mat_Ale: a matrix
+    # mat_Ble: a matrix
+    # 
+    # output:
+    # 
+    # True if a ray originate from point_o, by the direction of v, has 
+    # an intersection point inside geometry object point_a - point_b - point_c
+    # 
+    # If the ray is not perpendicular to the plane where the geometry object reside in,
+    # then, point_p, which is the intersection of the ray and the plane, can be written as:
+    #
+    # point_p = point_a + x * vec_ab + y * vec_ac,
+    #
+    # where vec_ab == point_b - point_a, vec_ac = point_c - point_a.
+    #
+    # Therefore, let point_p_arg be a column vector (x, y)^T, then, point_p is 'inside' that area
+    # can be explicitly defined as:
+    #
+    #     mat_Aeq @ point_p_arg == mat_Beq
+    # and mat_Aleq @ point_p_arg <= mat_Bleq
+    # and mat_Ale @ point_p_arg < mat_Ble
+    #
+    # where the at sign '@' denote matrix multiplication.
+    @classmethod
+    def check_intersect(
+        cls,
+        point_o: np.ndarray,
+        v: np.ndarray,
+        point_a: np.ndarray,
+        point_b: np.ndarray,
+        point_c: np.ndarray,
+        mat_Aeq: np.ndarray,
+        mat_Beq: np.ndarray,
+        mat_Aleq: np.ndarray,
+        mat_Bleq: np.ndarray,
+        mat_Ale: np.ndarray,
+        mat_Ble: np.ndarray
+    ) -> bool:
+        vec_ab = point_b - point_a
+        vec_ac = point_c - point_a
+        vec_p = np.cross(vec_ab, vec_ac)
+        eps = 1e-6
+        if abs(Helper.cosine(vec_p, v) - 0.0) < eps:
+            # now the ray is perpendicular to that plane, so there is no intersection.
+            return False
+        
+        # solve the equation:
+        # point_o + z * v == point_a + x * vec_ab + y * vec_ac
+        # where z, x, y are unknows.
+        c1 = (-1) * v.reshape(3, 1)
+        c2 = vec_ab.reshape(3, 1)
+        c3 = vec_ac.reshape(3, 1)
+        coeff_A = np.concatenate(
+            (c1, c2, c3,),
+            axis=1
+        )
+        coeff_B = (point_o - point_a).reshape(3, 1)
+        answer = np.linalg.solve(coeff_A, coeff_B)
+        # now answer[0] should be z, answer[1] should be x, and answer[2] should be y.
 
+        print(answer)
+
+        return True
+
+
+point_o = np.random.rand(3)
+v = np.random.rand(3)
+point_a = np.random.rand(3)
+point_b = np.random.rand(3)
+point_c = np.random.rand(3)
+
+mat_Aeq = np.zeros(1)
+mat_Beq = np.zeros(1)
+mat_Aleq = np.zeros(1)
+mat_Bleq = np.zeros(1)
+mat_Ale = np.zeros(1)
+mat_Ble = np.zeros(1)
+
+Helper.check_intersect(
+    point_o, 
+    v, 
+    point_a, 
+    point_b, 
+    point_c, 
+    mat_Aeq, 
+    mat_Beq, 
+    mat_Aleq, 
+    mat_Bleq, 
+    mat_Ale, 
+    mat_Ble
+)
