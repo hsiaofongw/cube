@@ -109,17 +109,6 @@ class TestHelperMethods(unittest.TestCase):
         vecs_v = v_lengths * vecs_v
         true_zs = distances / v_lengths
 
-        mat_Aleq = np.array([
-            [1, 1],
-            [-1, 0],
-            [0, -1]
-        ])
-        mat_Bleq = np.array([
-            [1],
-            [0],
-            [0]
-        ])
-
         computed_xs = np.zeros_like(true_xs)
         computed_ys = np.zeros_like(true_ys)
         computed_zs = np.zeros_like(true_zs)
@@ -134,9 +123,7 @@ class TestHelperMethods(unittest.TestCase):
                 v, 
                 point_a, 
                 point_b, 
-                point_c, 
-                mat_Aleq, 
-                mat_Bleq
+                point_c
             )
             computed_zs[i, 0] = answer[0, 0]
             computed_xs[i, 0] = answer[1, 0]
