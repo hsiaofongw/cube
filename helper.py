@@ -97,9 +97,6 @@ class Helper:
     #
     # output:
     # 
-    # True if a ray originate from point_o, by the direction of v, has 
-    # an intersection point inside geometry object point_a - point_b - point_c
-    # 
     # If the ray is not perpendicular to the plane where the geometry object reside in,
     # then, point_p, which is the intersection of the ray and the plane, can be written as:
     #
@@ -107,14 +104,13 @@ class Helper:
     #
     # where vec_ab == point_b - point_a, vec_ac = point_c - point_a.
     #
-    # Therefore, let point_p_arg be a column vector (x, y)^T, then, point_p is 'inside' that area
-    # can be explicitly defined as:
+    # Also, there must be some z, such that
+    #   
+    # point_p == point_o + z * v
     #
-    # mat_Aleq @ point_p_arg <= mat_Bleq
-    #
-    # where the at sign '@' denote matrix multiplication.
+    # It return a column vector (z, x, y)^T.
     @classmethod
-    def check_intersect(
+    def find_intersect(
         cls,
         point_o: np.ndarray,
         v: np.ndarray,
@@ -123,14 +119,14 @@ class Helper:
         point_c: np.ndarray,
         mat_Aleq: np.ndarray,
         mat_Bleq: np.ndarray
-    ) -> Tuple[bool, np.ndarray]:
+    ) -> np.ndarray:
         vec_ab = point_b - point_a
         vec_ac = point_c - point_a
         vec_p = np.cross(vec_ab, vec_ac)
         eps = 1e-6
         if abs(Helper.cosine(vec_p, v) - 0.0) < eps:
             # now the ray is perpendicular to that plane, so there is no intersection.
-            return (False, np.array([[np.nan], [np.nan], [np.nan]]),)
+            return np.array([[np.nan], [np.nan], [np.nan]])
         
         # solve the equation:
         # point_o + z * v == point_a + x * vec_ab + y * vec_ac
@@ -152,7 +148,7 @@ class Helper:
         rhs = mat_Bleq
         diff = lhs - rhs
         if not np.all(diff <= eps):
-            return (False, answer,)
+            return answer
 
-        return (True, answer,)
+        return answer
 

@@ -86,7 +86,7 @@ class TestHelperMethods(unittest.TestCase):
         rhs = Helper.cosine(vec_dp1, vec_ct)
         self.assertTrue(abs(lhs-rhs) < eps)
     
-    def test_check_intersect(self):
+    def test_find_intersect(self):
  
         n_samples = 100
         scale_factor = 100
@@ -129,7 +129,7 @@ class TestHelperMethods(unittest.TestCase):
             point_a = points_a[i, :]
             point_b = points_b[i, :]
             point_c = points_c[i, :]
-            check, answer = Helper.check_intersect(
+            answer = Helper.find_intersect(
                 point_o, 
                 v, 
                 point_a, 
