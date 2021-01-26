@@ -109,9 +109,6 @@ class TestHelperMethods(unittest.TestCase):
         vecs_v = v_lengths * vecs_v
         true_zs = distances / v_lengths
 
-        mat_Aeq = np.zeros(shape=(1, 2,), dtype=np.float)
-        mat_Beq = np.zeros(shape=(2, 1,), dtype=np.float)
-
         mat_Aleq = np.array([
             [1, 1],
             [-1, 0],
@@ -138,8 +135,6 @@ class TestHelperMethods(unittest.TestCase):
                 point_a, 
                 point_b, 
                 point_c, 
-                mat_Aeq, 
-                mat_Beq, 
                 mat_Aleq, 
                 mat_Bleq
             )

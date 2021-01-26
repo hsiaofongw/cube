@@ -92,9 +92,6 @@ class Helper:
     # point_b: second point of geometry object 
     # point_c: third point of geometry object
     #
-    # mat_Aeq: a matrix
-    # mat_Beq: a matrix
-    #
     # mat_Aleq: a matrix
     # mat_Bleq: a matrix
     #
@@ -113,8 +110,7 @@ class Helper:
     # Therefore, let point_p_arg be a column vector (x, y)^T, then, point_p is 'inside' that area
     # can be explicitly defined as:
     #
-    #     mat_Aeq @ point_p_arg == mat_Beq
-    # and mat_Aleq @ point_p_arg <= mat_Bleq
+    # mat_Aleq @ point_p_arg <= mat_Bleq
     #
     # where the at sign '@' denote matrix multiplication.
     @classmethod
@@ -125,8 +121,6 @@ class Helper:
         point_a: np.ndarray,
         point_b: np.ndarray,
         point_c: np.ndarray,
-        mat_Aeq: np.ndarray,
-        mat_Beq: np.ndarray,
         mat_Aleq: np.ndarray,
         mat_Bleq: np.ndarray
     ) -> Tuple[bool, np.ndarray]:
@@ -154,13 +148,6 @@ class Helper:
 
         eps = 1e-6
         point_p_args = answer[1:3, :]
-        lhs = mat_Aeq @ point_p_args
-        rhs = mat_Beq
-        diff = abs(lhs - rhs)
-        if not np.all(diff < eps):
-            return (False, answer,)
-        
-        eps = 1e-6
         lhs = mat_Aleq @ point_p_args
         rhs = mat_Bleq
         diff = lhs - rhs
