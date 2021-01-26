@@ -98,9 +98,6 @@ class Helper:
     # mat_Aleq: a matrix
     # mat_Bleq: a matrix
     #
-    # mat_Ale: a matrix
-    # mat_Ble: a matrix
-    # 
     # output:
     # 
     # True if a ray originate from point_o, by the direction of v, has 
@@ -118,7 +115,6 @@ class Helper:
     #
     #     mat_Aeq @ point_p_arg == mat_Beq
     # and mat_Aleq @ point_p_arg <= mat_Bleq
-    # and mat_Ale @ point_p_arg < mat_Ble
     #
     # where the at sign '@' denote matrix multiplication.
     @classmethod
@@ -132,17 +128,15 @@ class Helper:
         mat_Aeq: np.ndarray,
         mat_Beq: np.ndarray,
         mat_Aleq: np.ndarray,
-        mat_Bleq: np.ndarray,
-        mat_Ale: np.ndarray,
-        mat_Ble: np.ndarray
-    ) -> bool:
+        mat_Bleq: np.ndarray
+    ) -> Tuple[bool, np.ndarray]:
         vec_ab = point_b - point_a
         vec_ac = point_c - point_a
         vec_p = np.cross(vec_ab, vec_ac)
         eps = 1e-6
         if abs(Helper.cosine(vec_p, v) - 0.0) < eps:
             # now the ray is perpendicular to that plane, so there is no intersection.
-            return False
+            return (False, np.array([[np.nan], [np.nan], [np.nan]]),)
         
         # solve the equation:
         # point_o + z * v == point_a + x * vec_ab + y * vec_ac
@@ -155,37 +149,23 @@ class Helper:
             axis=1
         )
         coeff_B = (point_o - point_a).reshape(3, 1)
-        answer = np.linalg.solve(coeff_A, coeff_B)
+        answer: np.ndarray = np.linalg.solve(coeff_A, coeff_B)
         # now answer[0] should be z, answer[1] should be x, and answer[2] should be y.
 
-        print(answer)
+        eps = 1e-6
+        point_p_args = answer[1:3, :]
+        lhs = mat_Aeq @ point_p_args
+        rhs = mat_Beq
+        diff = abs(lhs - rhs)
+        if not np.all(diff < eps):
+            return (False, answer,)
+        
+        eps = 1e-6
+        lhs = mat_Aleq @ point_p_args
+        rhs = mat_Bleq
+        diff = lhs - rhs
+        if not np.all(diff <= eps):
+            return (False, answer,)
 
-        return True
+        return (True, answer,)
 
-
-point_o = np.random.rand(3)
-v = np.random.rand(3)
-point_a = np.random.rand(3)
-point_b = np.random.rand(3)
-point_c = np.random.rand(3)
-
-mat_Aeq = np.zeros(1)
-mat_Beq = np.zeros(1)
-mat_Aleq = np.zeros(1)
-mat_Bleq = np.zeros(1)
-mat_Ale = np.zeros(1)
-mat_Ble = np.zeros(1)
-
-Helper.check_intersect(
-    point_o, 
-    v, 
-    point_a, 
-    point_b, 
-    point_c, 
-    mat_Aeq, 
-    mat_Beq, 
-    mat_Aleq, 
-    mat_Bleq, 
-    mat_Ale, 
-    mat_Ble
-)

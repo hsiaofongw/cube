@@ -85,6 +85,54 @@ class TestHelperMethods(unittest.TestCase):
         lhs = Helper.cosine(vec_dp, vec_ct)
         rhs = Helper.cosine(vec_dp1, vec_ct)
         self.assertTrue(abs(lhs-rhs) < eps)
+    
+    def test_check_intersect(self):
+ 
+        pass
+        # n_positives = 100
+        # points_a = np.random.rand(n_positives, 3)
+        # points_b = np.random.rand(n_positives, 3)
+        # points_c = np.random.rand(n_positives, 3)
+        # vecs_ab = points_b - points_a
+        # vecs_ac = points_c - points_a
+        # points_o = np.random.rand(n_positives, 3)
+        # args_z = np.random.rand(n_positives, 1)
+        # args_x = np.random.rand(n_positives, 1)
+        # args_y = np.random.rand(n_positives, 1)
+
+        # point_o = np.random.rand(3)
+        # v = np.random.rand(3)
+        # point_a = np.random.rand(3)
+        # point_b = np.random.rand(3)
+        # point_c = np.random.rand(3)
+
+        # mat_Aeq = np.zeros(shape=(1, 2,), dtype=np.float)
+        # mat_Beq = np.zeros(shape=(1, 2,), dtype=np.float)
+
+        # mat_Aleq = np.array([
+        #     [1, 1],
+        #     [-1, 0],
+        #     [0, -1]
+        # ])
+        # mat_Bleq = np.array([
+        #     [1],
+        #     [0],
+        #     [0]
+        # ])
+
+        # result = Helper.check_intersect(
+        #     point_o, 
+        #     v, 
+        #     point_a, 
+        #     point_b, 
+        #     point_c, 
+        #     mat_Aeq, 
+        #     mat_Beq, 
+        #     mat_Aleq, 
+        #     mat_Bleq
+        # )
+
+        # print(result)
 
 if __name__ == '__main__':
     unittest.main(argv=['first-arg-is-ignored', '-v'])
