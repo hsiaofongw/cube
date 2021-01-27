@@ -25,13 +25,23 @@ class Helper:
         return cosines
     
     # input:
+    # xs: n by d matrix, each row is vector of length d
+    # ys: m by d matrix, each row is vector of length d
+    # output: a n by m matrix, is [i, j] element equals cosine(xs[i, :], ys[j, :])
+    @classmethod
+    def cosine_many_to_many(cls, xs: np.ndarray, ys: np.ndarray) -> np.ndarray:
+        xs = xs / (np.linalg.norm(xs, axis=1).reshape(xs.shape[0],1))
+        ys = ys / (np.linalg.norm(ys, axis=1).reshape(ys.shape[0],1))
+        cosines = xs @ (ys.T)
+        return cosines
+    
+    # input:
     # vec_b: a vector
     # vec_a: a vector
     # output: project of vec_a in vec_b
     @classmethod
     def projection(cls, vec_b: np.ndarray, vec_a: np.ndarray) -> np.ndarray:
         return vec_b * (np.inner(vec_a, vec_b)/np.sum(vec_b * vec_b))
-    
     
     # input:
     # point_c: a point

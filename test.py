@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
 from helper import Helper
-from math import cos, dist
+from math import cos
 from scipy.spatial.distance import cosine as cosine_distance
 
 class TestHelperMethods(unittest.TestCase):
@@ -136,6 +136,22 @@ class TestHelperMethods(unittest.TestCase):
         errors = np.abs(true_values - computed_values)
         max_error = np.max(errors)
         self.assertAlmostEqual(max_error, 0.0, delta=eps)
+    
+    def test_cosine_many_to_many(self):
+
+        xs = np.random.rand(100, 3)
+        ys = np.random.rand(120, 3)
+        cosines1 = Helper.cosine_many_to_many(xs, ys)
+
+        cosines2 = np.zeros_like(cosines1)
+        for i in range(cosines2.shape[0]):
+            for j in range(cosines2.shape[1]):
+                cosines2[i, j] = 1 - cosine_distance(xs[i, :], ys[j, :])
+        
+        errors = cosines1 - cosines2
+        max_error = np.max(np.abs(errors))
+        tolerance = 1e-6
+        self.assertAlmostEqual(max_error, 0.0, delta=tolerance)
 
 if __name__ == '__main__':
     unittest.main(argv=['first-arg-is-ignored', '-v'])
