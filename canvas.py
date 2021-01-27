@@ -40,15 +40,15 @@ class Canvas:
         height_pixels: np.ndarray
     ) -> np.ndarray:
 
-        left_arm = tan(angles_h[0]) * self.canvas_distance * self.canvas_base_i
-        right_arm = tan(angles_h[1]) * self.canvas_distance * self.canvas_base_i
-        top_arm = tan(angles_v[1]) * self.canvas_distance * self.canvas_base_j
-        bottom_arm = tan(angles_v[0]) * self.canvas_distance * self.canvas_base_j
+        left_arm = tan(angles_h[0]) * self.canvas_distance * self.base_i
+        right_arm = tan(angles_h[1]) * self.canvas_distance * self.base_i
+        top_arm = tan(angles_v[1]) * self.canvas_distance * self.base_j
+        bottom_arm = tan(angles_v[0]) * self.canvas_distance * self.base_j
 
         baby_step_j = (right_arm - left_arm) / width_pixels
         baby_step_i = (bottom_arm - top_arm) / height_pixels
 
-        h_steps, v_steps = np.meshgrid(np.arange(height_pixels), np.arange(width_pixels))
+        v_steps, h_steps = np.meshgrid(np.arange(height_pixels), np.arange(width_pixels))
         n_pixels = width_pixels * height_pixels
         h_steps = np.reshape(h_steps, newshape=(n_pixels, 1,))
         v_steps = np.reshape(v_steps, newshape=(n_pixels, 1,))
