@@ -1,8 +1,9 @@
 import numpy as np
 from scipy.spatial.transform import Rotation as R
-from math import sin, cos
+from math import sin, cos, floor
 from scipy.spatial.distance import cosine as cosine_distance
 from typing import Tuple
+from scipy.sparse import csr_matrix
 
 class Helper:
     
@@ -168,4 +169,30 @@ class Helper:
         # now answer[0] should be z, answer[1] should be x, and answer[2] should be y.
 
         return answer
+    
+    # input:
+    # data: data[(i*n_rows):((i+1)*n_rows), :] for (i+1) th matrix A_i
+    # output:
+    # diag{ A_0, A_1, ..., A_m }
+    @classmethod
+    def make_block_diagonal(
+        cls, 
+        data: np.ndarray, 
+        n_rows: int, 
+    ) -> csr_matrix:
+        n_cols = data.shape[1]
+        n_matrices = floor(data.shape[0]/n_rows)
+        if n_matrices == 0:
+            data = [np.nan]
+            indptr = [0,1]
+            indices = [0]
+            return csr_matrix((data, indices, indptr))
+        
+        indptr = np.arange(0, n_matrices*n_rows*n_cols + 1, n_cols)
+        indices = np.arange(0, n_matrices*n_cols)
+        indices = np.reshape(indices, newshape=(n_matrices, n_cols,))
+        indices = np.repeat(indices, n_rows, axis=0)
+        indices = np.reshape(indices, newshape=(indices.shape[0]*indices.shape[1],))
+        data = np.reshape(data, newshape=(data.shape[0]*data.shape[1],))
 
+        return csr_matrix((data, indices, indptr,))

@@ -1,5 +1,6 @@
 import unittest
 import numpy as np
+from scipy.sparse.construct import block_diag
 from helper import Helper
 from math import cos
 from scipy.spatial.distance import cosine as cosine_distance
@@ -149,6 +150,30 @@ class TestHelperMethods(unittest.TestCase):
                 cosines2[i, j] = 1 - cosine_distance(xs[i, :], ys[j, :])
         
         errors = cosines1 - cosines2
+        max_error = np.max(np.abs(errors))
+        tolerance = 1e-6
+        self.assertAlmostEqual(max_error, 0.0, delta=tolerance)
+    
+    def test_make_diagonal_matrix(self):
+
+        mat_A1 = np.random.rand(3, 4)
+        mat_A2 = np.random.rand(3, 4)
+        mat_A3 = np.random.rand(3, 4)
+        mat_A4 = np.random.rand(3, 4)
+        data = np.concatenate((mat_A1, mat_A2, mat_A3, mat_A4,), axis=0)
+        n_rows = 3
+
+        s = Helper.make_block_diagonal(data, n_rows)
+        block_diagonal = s.toarray()
+
+        mat_B1 = block_diagonal[0:3, 0:4]
+        mat_B2 = block_diagonal[3:6, 4:8]
+        mat_B3 = block_diagonal[6:9, 8:12]
+        mat_B4 = block_diagonal[9:12, 12:16]
+
+        lhs = data
+        rhs = np.concatenate((mat_B1, mat_B2, mat_B3, mat_B4,), axis=0)
+        errors = lhs - rhs
         max_error = np.max(np.abs(errors))
         tolerance = 1e-6
         self.assertAlmostEqual(max_error, 0.0, delta=tolerance)
