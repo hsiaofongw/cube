@@ -67,9 +67,8 @@ class Cube:
     def scale(
         self,
         factor: float,
-        center: np.ndarray
     ) -> None:
-        center = center.reshape(1, 3)
+        center = np.reshape(self.cube_center, newshape=(1,3,))
         extends = self.cube_vertices - center
         extends = extends * factor
         self.cube_vertices = center + extends

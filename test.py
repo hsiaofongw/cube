@@ -254,6 +254,51 @@ class TestCubeMethods(unittest.TestCase):
 
         tolerance = 1e-6
         self.assertAlmostEqual(max_error, 0.0, delta=tolerance)
+    
+    def test_scale(self):
+
+        cube_center = np.array([0, 0, 0])
+        edge_length = 1
+        cube = Cube(
+            cube_center,
+            edge_length
+        )
+
+        edge_lengths_before = cube.get_edge_lengths()
+
+        factor = np.random.rand()
+        cube.scale(factor)
+
+        edge_lengths_after = cube.get_edge_lengths()
+
+        tolerance = 1e-6
+        lhs = edge_lengths_before * factor
+        rhs = edge_lengths_after
+        max_error = np.max(np.abs(lhs - rhs))
+        self.assertAlmostEqual(max_error, 0.0, delta=tolerance)
+
+    
+    def test_move(self):
+
+        cube_center = np.array([0, 0, 0])
+        edge_length = 1
+        cube = Cube(
+            cube_center,
+            edge_length
+        )
+
+        edge_lengths_before = cube.get_edge_lengths()
+
+        replacement = np.random.rand(3)
+        cube.move(replacement)
+
+        edge_lengths_after = cube.get_edge_lengths()
+
+        tolerance = 1e-6
+        lhs = edge_lengths_before
+        rhs = edge_lengths_after
+        max_error = np.max(np.abs(lhs - rhs))
+        self.assertAlmostEqual(max_error, 0.0, delta=tolerance)
 
 if __name__ == '__main__':
     unittest.main(argv=['first-arg-is-ignored', '-v'])
