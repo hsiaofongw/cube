@@ -55,6 +55,7 @@ class Cube:
     
     def move(self, replacement: np.ndarray) -> None:
         self.cube_vertices += replacement
+        self.cube_center += replacement
         
     def rotate(
         self, 
