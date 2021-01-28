@@ -2,8 +2,9 @@ import unittest
 import numpy as np
 from scipy.sparse.construct import block_diag
 from helper import Helper
-from math import cos
+from math import cos, pi
 from scipy.spatial.distance import cosine as cosine_distance
+from cube import Cube
 
 class TestHelperMethods(unittest.TestCase):
 
@@ -226,6 +227,60 @@ class TestHelperMethods(unittest.TestCase):
         rhs = np.concatenate((mat_B1, mat_B2, mat_B3, mat_B4,), axis=0)
         errors = lhs - rhs
         max_error = np.max(np.abs(errors))
+        tolerance = 1e-6
+        self.assertAlmostEqual(max_error, 0.0, delta=tolerance)
+
+class TestCubeMethods(unittest.TestCase):
+
+    def test_rotate(self):
+
+        cube_center = np.array([0, 0, 0])
+        edge_length = 1
+        cube = Cube(
+            cube_center,
+            edge_length
+        )
+
+        edge_lengths_before = np.zeros(shape=(12,), dtype=np.float)
+
+        edge_lengths_before[0] = np.linalg.norm(cube.cube_vertices[0] - cube.cube_vertices[1])
+        edge_lengths_before[1] = np.linalg.norm(cube.cube_vertices[1] - cube.cube_vertices[2])
+        edge_lengths_before[2] = np.linalg.norm(cube.cube_vertices[2] - cube.cube_vertices[3])
+        edge_lengths_before[3] = np.linalg.norm(cube.cube_vertices[3] - cube.cube_vertices[0])
+
+        edge_lengths_before[4] = np.linalg.norm(cube.cube_vertices[4] - cube.cube_vertices[5])
+        edge_lengths_before[5] = np.linalg.norm(cube.cube_vertices[5] - cube.cube_vertices[6])
+        edge_lengths_before[6] = np.linalg.norm(cube.cube_vertices[6] - cube.cube_vertices[7])
+        edge_lengths_before[7] = np.linalg.norm(cube.cube_vertices[7] - cube.cube_vertices[4])
+
+        edge_lengths_before[8] = np.linalg.norm(cube.cube_vertices[0] - cube.cube_vertices[4])
+        edge_lengths_before[9] = np.linalg.norm(cube.cube_vertices[1] - cube.cube_vertices[5])
+        edge_lengths_before[10] = np.linalg.norm(cube.cube_vertices[2] - cube.cube_vertices[6])
+        edge_lengths_before[11] = np.linalg.norm(cube.cube_vertices[3] - cube.cube_vertices[7])
+
+        rotate_axis = np.array([0, 0, 1])
+        radian = pi/6
+        cube.rotate(rotate_axis, radian)
+
+        edge_lengths_after = np.zeros(shape=(12,), dtype=np.float)
+
+        edge_lengths_after[0] = np.linalg.norm(cube.cube_vertices[0] - cube.cube_vertices[1])
+        edge_lengths_after[1] = np.linalg.norm(cube.cube_vertices[1] - cube.cube_vertices[2])
+        edge_lengths_after[2] = np.linalg.norm(cube.cube_vertices[2] - cube.cube_vertices[3])
+        edge_lengths_after[3] = np.linalg.norm(cube.cube_vertices[3] - cube.cube_vertices[0])
+
+        edge_lengths_after[4] = np.linalg.norm(cube.cube_vertices[4] - cube.cube_vertices[5])
+        edge_lengths_after[5] = np.linalg.norm(cube.cube_vertices[5] - cube.cube_vertices[6])
+        edge_lengths_after[6] = np.linalg.norm(cube.cube_vertices[6] - cube.cube_vertices[7])
+        edge_lengths_after[7] = np.linalg.norm(cube.cube_vertices[7] - cube.cube_vertices[4])
+
+        edge_lengths_after[8] = np.linalg.norm(cube.cube_vertices[0] - cube.cube_vertices[4])
+        edge_lengths_after[9] = np.linalg.norm(cube.cube_vertices[1] - cube.cube_vertices[5])
+        edge_lengths_after[10] = np.linalg.norm(cube.cube_vertices[2] - cube.cube_vertices[6])
+        edge_lengths_after[11] = np.linalg.norm(cube.cube_vertices[3] - cube.cube_vertices[7])
+
+        max_error = np.max(np.abs(edge_lengths_after - edge_lengths_before))
+
         tolerance = 1e-6
         self.assertAlmostEqual(max_error, 0.0, delta=tolerance)
 

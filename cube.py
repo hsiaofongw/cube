@@ -59,11 +59,19 @@ class Cube:
     def rotate(
         self, 
         rotate_axis: np.ndarray,
-        rotate_center: np.ndarray,
         radian: float = 0
     ) -> None:
-        
-        self.cube_vertices = Helper.rotate_many(self.cube_vertices, rotate_center, rotate_axis, radian)
+        self.cube_vertices = Helper.rotate_many(self.cube_vertices, rotate_axis, radian)
+    
+    def scale(
+        self,
+        factor: float,
+        center: np.ndarray
+    ) -> None:
+        center = center.reshape(1, 3)
+        extends = self.cube_vertices - center
+        extends = extends * factor
+        self.cube_vertices = center + extends
     
     def get_facades_indexes(self) -> np.ndarray:
         

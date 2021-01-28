@@ -15,7 +15,6 @@ np.savetxt('vertexes0.csv', cube.cube_vertices, delimiter=',')
 
 cube.rotate(
     np.array([0, 0, 1]),
-    cube.cube_center,
     pi/6
 )
 np.savetxt('vertexes1.csv', cube.cube_vertices, delimiter=',')

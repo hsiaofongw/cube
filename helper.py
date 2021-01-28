@@ -79,7 +79,8 @@ class Helper:
         dir_j = np.cross(vec_dp, direction)
         dir_j = dir_j / np.linalg.norm(dir_j)
         dir_i = vec_dp / np.linalg.norm(vec_dp)
-        vec_dp1 = cos(theta) * dir_i + sin(theta) * dir_j
+        length_dp = np.linalg.norm(vec_dp)
+        vec_dp1 = length_dp * (cos(theta) * dir_i + sin(theta) * dir_j)
         vec_pp1 = vec_dp1 - vec_dp
         point_p1 = point_p + vec_pp1
         
@@ -104,7 +105,8 @@ class Helper:
         dirs_j = np.cross(direction, vecs_dp, axisb=1)
         dirs_j = dirs_j / np.linalg.norm(dirs_j, axis=1).reshape(dirs_j.shape[0],1)
         dirs_i = vecs_dp / np.linalg.norm(vecs_dp, axis=1).reshape(vecs_dp.shape[0],1)
-        vecs_dp1 = cos(theta) * dirs_i + sin(theta) * dirs_j
+        lengths_dp = np.linalg.norm(vecs_dp, axis=1).reshape(points_p.shape[0], 1)
+        vecs_dp1 = lengths_dp * (cos(theta) * dirs_i + sin(theta) * dirs_j)
         vecs_pp1 = vecs_dp1 - vecs_dp
         points_p1 = points_p + vecs_pp1
 
