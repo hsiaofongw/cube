@@ -48,13 +48,13 @@ class Canvas:
         baby_step_j = (right_arm - left_arm) / width_pixels
         baby_step_i = (bottom_arm - top_arm) / height_pixels
 
-        v_steps, h_steps = np.meshgrid(np.arange(height_pixels), np.arange(width_pixels))
+        h_steps, v_steps = np.meshgrid(np.arange(height_pixels), np.arange(width_pixels))
         n_pixels = width_pixels * height_pixels
         h_steps = np.reshape(h_steps, newshape=(n_pixels, 1,))
         v_steps = np.reshape(v_steps, newshape=(n_pixels, 1,))
 
         pixel_origin = self.canvas_center + left_arm + top_arm
-        pixels = pixel_origin + h_steps * baby_step_i + v_steps * baby_step_j
+        pixels = pixel_origin + v_steps * baby_step_j + h_steps * baby_step_i
 
         return pixels
         
