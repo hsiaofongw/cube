@@ -71,19 +71,20 @@ class Helper:
         cls,
         point_p: np.ndarray, 
         direction: np.ndarray, 
+        center: np.ndarray,
         theta: float
     ) -> np.ndarray:
 
-        projection = direction * np.inner(direction, point_p) / np.inner(direction, direction)
-        vec_dp = point_p - projection
+        vec_cp = point_p - center
+        projection = direction * np.inner(direction, vec_cp) / np.inner(direction, direction)
+        vec_dp = vec_cp - projection
         dir_j = np.cross(vec_dp, direction)
         dir_j = dir_j / np.linalg.norm(dir_j)
         dir_i = vec_dp / np.linalg.norm(vec_dp)
         length_dp = np.linalg.norm(vec_dp)
         vec_dp1 = length_dp * (cos(theta) * dir_i + sin(theta) * dir_j)
-        vec_pp1 = vec_dp1 - vec_dp
-        point_p1 = point_p + vec_pp1
-        
+        point_p1 = center + projection + vec_dp1
+
         return point_p1
     
     # input:
@@ -95,21 +96,21 @@ class Helper:
         cls,
         points_p: np.ndarray,
         direction: np.ndarray,
-        theta: float
+        center: np.ndarray,
+        theta: np.ndarray
     ) -> np.ndarray:
-
-        inner_ab = np.sum((direction.reshape(1,3)) * points_p, axis=1)
+        vecs_cp = points_p - center
+        inner_ab = np.sum((direction.reshape(1,3)) * vecs_cp, axis=1)
         inner_aa = np.inner(direction, direction)
         projections = direction.reshape(1, 3) * (inner_ab / inner_aa).reshape((inner_ab.shape[0], 1))
-        vecs_dp = points_p - projections
+        vecs_dp = vecs_cp - projections
         dirs_j = np.cross(direction, vecs_dp, axisb=1)
         dirs_j = dirs_j / np.linalg.norm(dirs_j, axis=1).reshape(dirs_j.shape[0],1)
         dirs_i = vecs_dp / np.linalg.norm(vecs_dp, axis=1).reshape(vecs_dp.shape[0],1)
         lengths_dp = np.linalg.norm(vecs_dp, axis=1).reshape(points_p.shape[0], 1)
         vecs_dp1 = lengths_dp * (cos(theta) * dirs_i + sin(theta) * dirs_j)
-        vecs_pp1 = vecs_dp1 - vecs_dp
-        points_p1 = points_p + vecs_pp1
-
+        points_p1 = center + projections + vecs_dp1
+        
         return points_p1
                 
     

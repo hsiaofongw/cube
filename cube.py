@@ -59,9 +59,10 @@ class Cube:
     def rotate(
         self, 
         rotate_axis: np.ndarray,
-        radian: float = 0
+        center: np.ndarray,
+        radian: float
     ) -> None:
-        self.cube_vertices = Helper.rotate_many(self.cube_vertices, rotate_axis, radian)
+        self.cube_vertices = Helper.rotate_many(self.cube_vertices, rotate_axis, center, radian)
     
     def scale(
         self,
@@ -113,4 +114,24 @@ class Cube:
 
         
         return (points_a, points_b, points_c,)
+    
+    def get_edge_lengths(self) -> np.ndarray:
+        edge_lengths = np.zeros(shape=(12,), dtype=np.float)
+
+        edge_lengths[0] = np.linalg.norm(self.cube_vertices[0] - self.cube_vertices[1])
+        edge_lengths[1] = np.linalg.norm(self.cube_vertices[1] - self.cube_vertices[2])
+        edge_lengths[2] = np.linalg.norm(self.cube_vertices[2] - self.cube_vertices[3])
+        edge_lengths[3] = np.linalg.norm(self.cube_vertices[3] - self.cube_vertices[0])
+
+        edge_lengths[4] = np.linalg.norm(self.cube_vertices[4] - self.cube_vertices[5])
+        edge_lengths[5] = np.linalg.norm(self.cube_vertices[5] - self.cube_vertices[6])
+        edge_lengths[6] = np.linalg.norm(self.cube_vertices[6] - self.cube_vertices[7])
+        edge_lengths[7] = np.linalg.norm(self.cube_vertices[7] - self.cube_vertices[4])
+
+        edge_lengths[8] = np.linalg.norm(self.cube_vertices[0] - self.cube_vertices[4])
+        edge_lengths[9] = np.linalg.norm(self.cube_vertices[1] - self.cube_vertices[5])
+        edge_lengths[10] = np.linalg.norm(self.cube_vertices[2] - self.cube_vertices[6])
+        edge_lengths[11] = np.linalg.norm(self.cube_vertices[3] - self.cube_vertices[7])
+
+        return edge_lengths
    

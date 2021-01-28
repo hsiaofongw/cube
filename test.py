@@ -71,73 +71,74 @@ class TestHelperMethods(unittest.TestCase):
     def test_rotate_one(self):
         point_p = np.random.rand(3)
         direction = np.random.rand(3)
+        center = np.random.rand(3)
         theta = np.random.rand()
-        point_p1 = Helper.rotate_one(point_p, direction, theta)
+
+        point_p1 = Helper.rotate_one(point_p, direction, center, theta)
+
+        vec_cp1 = point_p1 - center
+        vec_cp = point_p - center
+        projection = direction * np.inner(direction, vec_cp) / np.inner(direction, direction)
+        vec_dp1 = vec_cp1 - projection
+        vec_dp = vec_cp - projection
 
         tolerance = 1e-6
-        self.assertAlmostEqual(
-            Helper.cosine(point_p1 - point_p, direction),
-            0.0,
-            delta=tolerance
-        )
-
-        projection = direction * np.inner(direction, point_p) / np.inner(direction, direction)
-        vec_dp = point_p - projection
-        vec_dp1 = point_p1 - projection
+        lhs = Helper.cosine(vec_dp1, vec_dp)
+        rhs = cos(theta)
+        self.assertAlmostEqual(lhs, rhs, delta=tolerance)
 
         tolerance = 1e-6
-        self.assertAlmostEqual(
-            Helper.cosine(vec_dp1, vec_dp),
-            cos(theta),
-            delta=tolerance
-        )
-    
+        lhs = Helper.cosine(vec_dp1, direction)
+        rhs = 0.0
+        self.assertAlmostEqual(lhs, rhs, delta=tolerance)
+
+        tolerance = 1e-6
+        lhs = Helper.cosine(vec_dp, direction)
+        rhs = 0.0
+        self.assertAlmostEqual(lhs, rhs, delta=tolerance)
+
     def test_rotate_many(self):
 
         n_samples = 100
         points_p = np.random.rand(n_samples, 3)
         direction = np.random.rand(3)
+        center = np.random.rand(3)
         theta = np.random.rand()
 
-        points_p1 = Helper.rotate_many(
-            points_p,
-            direction,
-            theta
-        )
-
-        inner_ab = np.sum((direction.reshape(1,3)) * points_p, axis=1)
+        points_p1 = Helper.rotate_many(points_p, direction, center, theta)
+        vecs_cp = points_p - center
+        vecs_cp1 = points_p1 - center
+        inner_ab = np.sum((direction.reshape(1,3)) * vecs_cp, axis=1)
         inner_aa = np.inner(direction, direction)
         projections = direction.reshape(1, 3) * (inner_ab / inner_aa).reshape((inner_ab.shape[0], 1))
 
-        vecs_dp = points_p - projections
-        vecs_dp1 = points_p1 - projections
+        vecs_dp = vecs_cp - projections
+        vecs_dp1 = vecs_cp1 - projections
 
         tolerance = 1e-6
-        lhs = Helper.cosine_many_to_many(
-            direction.reshape(1, 3),
-            vecs_dp
-        )
-        rhs = np.zeros_like(lhs)
-        max_error = np.max(np.abs(lhs - rhs))
-        self.assertAlmostEqual(max_error, 0.0, delta=tolerance)
+        lhs = np.max(np.abs(np.diagonal(Helper.cosine_many_to_many(vecs_dp, vecs_dp1)) - cos(theta)))
+        rhs = 0.0
+        self.assertAlmostEqual(lhs, rhs, delta=tolerance)
 
         tolerance = 1e-6
-        lhs = Helper.cosine_many_to_many(
-            direction.reshape(1, 3),
-            vecs_dp1
-        )
-        rhs = np.zeros_like(lhs)
-        max_error = np.max(np.abs(lhs - rhs))
-        self.assertAlmostEqual(max_error, 0.0, delta=tolerance)
+        lhs = np.max(np.abs(
+            Helper.cosine_many_to_many(
+                direction.reshape(1, 3),
+                vecs_dp
+            ) - 0
+        ))
+        rhs = 0.0
+        self.assertAlmostEqual(lhs, rhs, delta=tolerance)
 
         tolerance = 1e-6
-        lhs = Helper.cosine_many(
-            vecs_dp,
-            vecs_dp1
-        )
-        rhs = cos(theta) * np.ones_like(lhs)
-        max_error = np.max(np.abs(lhs - rhs))
-        self.assertAlmostEqual(max_error, 0.0, delta=tolerance)
+        np.max(np.abs(
+            Helper.cosine_many_to_many(
+                direction.reshape(1, 3),
+                vecs_dp1
+            ) - 0
+        ))
+        rhs = 0.0
+        self.assertAlmostEqual(lhs, rhs, delta=tolerance)
 
     def test_find_intersect(self):
  
@@ -241,43 +242,13 @@ class TestCubeMethods(unittest.TestCase):
             edge_length
         )
 
-        edge_lengths_before = np.zeros(shape=(12,), dtype=np.float)
-
-        edge_lengths_before[0] = np.linalg.norm(cube.cube_vertices[0] - cube.cube_vertices[1])
-        edge_lengths_before[1] = np.linalg.norm(cube.cube_vertices[1] - cube.cube_vertices[2])
-        edge_lengths_before[2] = np.linalg.norm(cube.cube_vertices[2] - cube.cube_vertices[3])
-        edge_lengths_before[3] = np.linalg.norm(cube.cube_vertices[3] - cube.cube_vertices[0])
-
-        edge_lengths_before[4] = np.linalg.norm(cube.cube_vertices[4] - cube.cube_vertices[5])
-        edge_lengths_before[5] = np.linalg.norm(cube.cube_vertices[5] - cube.cube_vertices[6])
-        edge_lengths_before[6] = np.linalg.norm(cube.cube_vertices[6] - cube.cube_vertices[7])
-        edge_lengths_before[7] = np.linalg.norm(cube.cube_vertices[7] - cube.cube_vertices[4])
-
-        edge_lengths_before[8] = np.linalg.norm(cube.cube_vertices[0] - cube.cube_vertices[4])
-        edge_lengths_before[9] = np.linalg.norm(cube.cube_vertices[1] - cube.cube_vertices[5])
-        edge_lengths_before[10] = np.linalg.norm(cube.cube_vertices[2] - cube.cube_vertices[6])
-        edge_lengths_before[11] = np.linalg.norm(cube.cube_vertices[3] - cube.cube_vertices[7])
+        edge_lengths_before = cube.get_edge_lengths()
 
         rotate_axis = np.array([0, 0, 1])
         radian = pi/6
-        cube.rotate(rotate_axis, radian)
+        cube.rotate(rotate_axis, cube.cube_center, radian)
 
-        edge_lengths_after = np.zeros(shape=(12,), dtype=np.float)
-
-        edge_lengths_after[0] = np.linalg.norm(cube.cube_vertices[0] - cube.cube_vertices[1])
-        edge_lengths_after[1] = np.linalg.norm(cube.cube_vertices[1] - cube.cube_vertices[2])
-        edge_lengths_after[2] = np.linalg.norm(cube.cube_vertices[2] - cube.cube_vertices[3])
-        edge_lengths_after[3] = np.linalg.norm(cube.cube_vertices[3] - cube.cube_vertices[0])
-
-        edge_lengths_after[4] = np.linalg.norm(cube.cube_vertices[4] - cube.cube_vertices[5])
-        edge_lengths_after[5] = np.linalg.norm(cube.cube_vertices[5] - cube.cube_vertices[6])
-        edge_lengths_after[6] = np.linalg.norm(cube.cube_vertices[6] - cube.cube_vertices[7])
-        edge_lengths_after[7] = np.linalg.norm(cube.cube_vertices[7] - cube.cube_vertices[4])
-
-        edge_lengths_after[8] = np.linalg.norm(cube.cube_vertices[0] - cube.cube_vertices[4])
-        edge_lengths_after[9] = np.linalg.norm(cube.cube_vertices[1] - cube.cube_vertices[5])
-        edge_lengths_after[10] = np.linalg.norm(cube.cube_vertices[2] - cube.cube_vertices[6])
-        edge_lengths_after[11] = np.linalg.norm(cube.cube_vertices[3] - cube.cube_vertices[7])
+        edge_lengths_after = cube.get_edge_lengths()
 
         max_error = np.max(np.abs(edge_lengths_after - edge_lengths_before))
 
