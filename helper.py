@@ -99,7 +99,7 @@ class Helper:
 
         inner_ab = np.sum((direction.reshape(1,3)) * points_p, axis=1)
         inner_aa = np.inner(direction, direction)
-        projections = direction.reshape(1, 3) * (inner_ab / inner_aa).reshape(10, 1)
+        projections = direction.reshape(1, 3) * (inner_ab / inner_aa).reshape((inner_ab.shape[0], 1))
         vecs_dp = points_p - projections
         dirs_j = np.cross(direction, vecs_dp, axisb=1)
         dirs_j = dirs_j / np.linalg.norm(dirs_j, axis=1).reshape(dirs_j.shape[0],1)

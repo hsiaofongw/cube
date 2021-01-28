@@ -91,6 +91,53 @@ class TestHelperMethods(unittest.TestCase):
             delta=tolerance
         )
     
+    def test_rotate_many(self):
+
+        n_samples = 100
+        points_p = np.random.rand(n_samples, 3)
+        direction = np.random.rand(3)
+        theta = np.random.rand()
+
+        points_p1 = Helper.rotate_many(
+            points_p,
+            direction,
+            theta
+        )
+
+        inner_ab = np.sum((direction.reshape(1,3)) * points_p, axis=1)
+        inner_aa = np.inner(direction, direction)
+        projections = direction.reshape(1, 3) * (inner_ab / inner_aa).reshape((inner_ab.shape[0], 1))
+
+        vecs_dp = points_p - projections
+        vecs_dp1 = points_p1 - projections
+
+        tolerance = 1e-6
+        lhs = Helper.cosine_many_to_many(
+            direction.reshape(1, 3),
+            vecs_dp
+        )
+        rhs = np.zeros_like(lhs)
+        max_error = np.max(np.abs(lhs - rhs))
+        self.assertAlmostEqual(max_error, 0.0, delta=tolerance)
+
+        tolerance = 1e-6
+        lhs = Helper.cosine_many_to_many(
+            direction.reshape(1, 3),
+            vecs_dp1
+        )
+        rhs = np.zeros_like(lhs)
+        max_error = np.max(np.abs(lhs - rhs))
+        self.assertAlmostEqual(max_error, 0.0, delta=tolerance)
+
+        tolerance = 1e-6
+        lhs = Helper.cosine_many(
+            vecs_dp,
+            vecs_dp1
+        )
+        rhs = cos(theta) * np.ones_like(lhs)
+        max_error = np.max(np.abs(lhs - rhs))
+        self.assertAlmostEqual(max_error, 0.0, delta=tolerance)
+
     def test_find_intersect(self):
  
         n_samples = 100
