@@ -69,23 +69,27 @@ class TestHelperMethods(unittest.TestCase):
     
     def test_rotate_one(self):
         point_p = np.random.rand(3)
-        point_c = np.random.rand(3)
-        point_t = np.random.rand(3)
+        direction = np.random.rand(3)
         theta = np.random.rand()
-        
-        vec_dp1, point_p1 = Helper.rotate_one(point_c, point_t, point_p, theta)
-        point_d = point_p1 - vec_dp1
-        vec_dp = point_p - point_d
+        point_p1 = Helper.rotate_one(point_p, direction, theta)
 
-        lhs = Helper.cosine(vec_dp, vec_dp1)
-        rhs = cos(theta)
-        eps = 1e-6
-        self.assertTrue(abs(lhs-rhs) < eps)
-        
-        vec_ct = point_t - point_c
-        lhs = Helper.cosine(vec_dp, vec_ct)
-        rhs = Helper.cosine(vec_dp1, vec_ct)
-        self.assertTrue(abs(lhs-rhs) < eps)
+        tolerance = 1e-6
+        self.assertAlmostEqual(
+            Helper.cosine(point_p1 - point_p, direction),
+            0.0,
+            delta=tolerance
+        )
+
+        projection = direction * np.inner(direction, point_p) / np.inner(direction, direction)
+        vec_dp = point_p - projection
+        vec_dp1 = point_p1 - projection
+
+        tolerance = 1e-6
+        self.assertAlmostEqual(
+            Helper.cosine(vec_dp1, vec_dp),
+            cos(theta),
+            delta=tolerance
+        )
     
     def test_find_intersect(self):
  

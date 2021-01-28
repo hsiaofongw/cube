@@ -65,34 +65,51 @@ class Helper:
         
         return vec_db
     
-    # input:
-    # point_c: center of the sphere
-    # point_t: vec_ct denote sphere direction axis
-    # point_p: point to be rotate
-    # theta: radian of rotate
-    # output:
-    # vec_dp1: satisfy that cosine(vec_dp1, vec_dp) = cosine(theta) and 
-    # cosine(vec_dp1, vec_ct) == 0, 
-    # where point_d satisfy that cosine(vec_dp, vec_ct) == 0,
-    # point_p1: p1 in vec_dp1
+    # 返回 point_p 沿着垂直 direction 的平面旋转 theta 弧度得到的点 point_p1
     @classmethod
     def rotate_one(
         cls,
-        point_c: np.ndarray,
-        point_t: np.ndarray,
-        point_p: np.ndarray,
+        point_p: np.ndarray, 
+        direction: np.ndarray, 
         theta: float
-    ) -> Tuple[np.ndarray, np.ndarray]:
+    ) -> np.ndarray:
+
+        projection = direction * np.inner(direction, point_p) / np.inner(direction, direction)
+        vec_dp = point_p - projection
+        dir_j = np.cross(vec_dp, direction)
+        dir_j = dir_j / np.linalg.norm(dir_j)
+        dir_i = vec_dp / np.linalg.norm(vec_dp)
+        vec_dp1 = cos(theta) * dir_i + sin(theta) * dir_j
+        vec_pp1 = vec_dp1 - vec_dp
+        point_p1 = point_p + vec_pp1
         
-        vec_dp = Helper.vertical_line(point_c, point_t, point_p)
-        vec_i = vec_dp / np.linalg.norm(vec_dp)
-        vec_ct = point_t - point_c
-        vec_j = np.cross(vec_i, vec_ct)
-        vec_j = vec_j / np.linalg.norm(vec_j)
-        vec_dp1 = np.linalg.norm(vec_dp) * (cos(theta) * vec_i + sin(theta) * vec_j)
-        point_p1 = point_p - vec_dp + vec_dp1
-        
-        return (vec_dp1, point_p1, )
+        return point_p1
+    
+    # input:
+    # direction: direction of the rotate axis
+    # points_p: points to be rotate
+    # theta: angle size of rotate
+    @classmethod
+    def rotate_many(
+        cls,
+        points_p: np.ndarray,
+        direction: np.ndarray,
+        theta: float
+    ) -> np.ndarray:
+
+        inner_ab = np.sum((direction.reshape(1,3)) * points_p, axis=1)
+        inner_aa = np.inner(direction, direction)
+        projections = direction.reshape(1, 3) * (inner_ab / inner_aa).reshape(10, 1)
+        vecs_dp = points_p - projections
+        dirs_j = np.cross(direction, vecs_dp, axisb=1)
+        dirs_j = dirs_j / np.linalg.norm(dirs_j, axis=1).reshape(dirs_j.shape[0],1)
+        dirs_i = vecs_dp / np.linalg.norm(vecs_dp, axis=1).reshape(vecs_dp.shape[0],1)
+        vecs_dp1 = cos(theta) * dirs_i + sin(theta) * dirs_j
+        vecs_pp1 = vecs_dp1 - vecs_dp
+        points_p1 = points_p + vecs_pp1
+
+        return points_p1
+                
     
     # input: 
     # v: length 3 vector, direction of the ray

@@ -1,7 +1,9 @@
 import numpy as np
+
 from scipy.spatial.transform import Rotation as R
 from scipy.spatial.distance import cosine as cosine_distance
 from helper import Helper
+from typing import Tuple
 
 class Cube:
     
@@ -58,7 +60,6 @@ class Cube:
         self, 
         rotate_axis: np.ndarray,
         rotate_center: np.ndarray,
-        degree: float = 0,
         radian: float = 0
     ) -> None:
         
@@ -86,35 +87,22 @@ class Cube:
             [7, 4, 8]
         ]) - 1
     
-    def get_facades(self) -> np.ndarray:
+    def get_facades(self) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
 
         vertexes = self.cube_vertices
-        triangles = np.zeros(shape = (12, 3, 3,), dtype=np.float)
         triangle_indexes = self.get_facades_indexes()
+        points_a = np.zeros(shape=(12, 3,), dtype=np.float)
+        points_b = np.zeros(shape=(12, 3,), dtype=np.float)
+        points_c = np.zeros(shape=(12, 3,), dtype=np.float)
         for i in range(triangle_indexes.shape[0]):
             point_a_ind = triangle_indexes[i, 0]
             point_b_ind = triangle_indexes[i, 1]
             point_c_ind = triangle_indexes[i, 2]
 
-            point_a = vertexes[point_a_ind, :]
-            point_b = vertexes[point_b_ind, :]
-            point_c = vertexes[point_c_ind, :]
+            points_a[i, :] = vertexes[point_a_ind, :]
+            points_b[i, :] = vertexes[point_b_ind, :]
+            points_c[i, :] = vertexes[point_c_ind, :]
 
-            triangles[i][0] = point_a
-            triangles[i][1] = point_b
-            triangles[i][2] = point_c
         
-        return triangles
+        return (points_a, points_b, points_c,)
    
-
-
-points = np.random.rand(100, 3)
-center = np.random.rand(3)
-axis =  np.random.rand(3)
-
-norms = np.linalg.norm(points, axis=1)
-selector = norms > 1e-6
-
-
-
-print(norms.shape)
