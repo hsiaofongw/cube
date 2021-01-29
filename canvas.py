@@ -22,14 +22,16 @@ class Canvas:
     
     # define the horizon for canvas, horizon should not parallel to the norm of canvas
     def set_horizon(self, horizon: np.ndarray) -> None:
-        horizon = Helper.vertical_line(
-            self.canvas_center, 
-            self.canvas_center + self.view_direction,
-            self.canvas_center + horizon
-        )
-        self.base_i = horizon / np.linalg.norm(horizon)
-        self.view_direction = self.view_direction / np.linalg.norm(self.view_direction)
-        self.base_j = np.cross(self.base_i, self.view_direction)
+
+        projection = self.view_direction  * np.inner(
+            self.view_direction, horizon
+        ) / np.inner(self.view_direction, self.view_direction)
+
+        horizon = horizon - projection
+        self.dir_x = horizon / np.linalg.norm(horizon)
+
+        self.dir_y = np.cross(self.dir_x, self.view_direction)
+        self.dir_y = self.dir_y / np.linalg.norm(self.dir_y)
         
     # get locations of each canvas pixel 
     def get_pixel_points(
@@ -40,21 +42,31 @@ class Canvas:
         height_pixels: np.ndarray
     ) -> np.ndarray:
 
-        left_arm = tan(angles_h[0]) * self.canvas_distance * self.base_i
-        right_arm = tan(angles_h[1]) * self.canvas_distance * self.base_i
-        top_arm = tan(angles_v[1]) * self.canvas_distance * self.base_j
-        bottom_arm = tan(angles_v[0]) * self.canvas_distance * self.base_j
+        left_arm = tan(angles_h[0]) * self.canvas_distance * self.dir_x
+        right_arm = tan(angles_h[1]) * self.canvas_distance * self.dir_x
 
-        baby_step_j = (right_arm - left_arm) / width_pixels
-        baby_step_i = (bottom_arm - top_arm) / height_pixels
+        top_arm = tan(angles_v[1]) * self.canvas_distance * self.dir_y
+        bottom_arm = tan(angles_v[0]) * self.canvas_distance * self.dir_y
 
-        h_steps, v_steps = np.meshgrid(np.arange(height_pixels), np.arange(width_pixels))
-        n_pixels = width_pixels * height_pixels
-        h_steps = np.reshape(h_steps, newshape=(n_pixels, 1,))
-        v_steps = np.reshape(v_steps, newshape=(n_pixels, 1,))
+        baby_step_x = (right_arm - left_arm) / width_pixels
+        baby_step_y = (bottom_arm - top_arm) / height_pixels
+
+        baby_step_x = np.atleast_2d(baby_step_x)
+        baby_step_y = np.atleast_2d(baby_step_y)
+
+        x_steps, y_steps = np.meshgrid(
+            np.arange(width_pixels),
+            np.arange(height_pixels)
+        )
+
+        x_steps = x_steps.flatten(order='C')
+        y_steps = y_steps.flatten(order='C')
+
+        x_steps = np.atleast_2d(x_steps).T
+        y_steps = np.atleast_2d(y_steps).T
 
         pixel_origin = self.canvas_center + left_arm + top_arm
-        pixels = pixel_origin + v_steps * baby_step_j + h_steps * baby_step_i
+        pixels = pixel_origin + x_steps * baby_step_x + y_steps * baby_step_y
 
         return pixels
         

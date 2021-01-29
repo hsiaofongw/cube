@@ -39,10 +39,10 @@ class Cube:
         c0 = (cube_center - h_vec_i + h_vec_j - h_vec_k).reshape(1, 3)
         d0 = (cube_center + h_vec_i + h_vec_j - h_vec_k).reshape(1, 3)
         
-        a1 = a0 + 2 * vec_k
-        b1 = b0 + 2 * vec_k
-        c1 = c0 + 2 * vec_k
-        d1 = d0 + 2 * vec_k
+        a1 = a0 + edge_length * vec_k
+        b1 = b0 + edge_length * vec_k
+        c1 = c0 + edge_length * vec_k
+        d1 = d0 + edge_length * vec_k
         
         self.cube_vertices = np.concatenate(
             (a0,b0,c0,d0,a1,b1,c1,d1,),
