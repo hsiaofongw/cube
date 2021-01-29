@@ -3,7 +3,8 @@ from cube import Cube
 import numpy as np
 from helper import Helper
 from tqdm import tqdm
-from scipy.sparse.linalg import lsqr, splu
+from scipy.sparse.linalg import splu
+import time
 
 class SimpleRenderer:
 
@@ -63,7 +64,7 @@ class CPUMatrixRenderer:
         points_c: np.ndarray
     ) -> np.ndarray:
 
-        print("start.")
+        print("constructing coefficients matrices ...")
 
         n_triangles = points_a.shape[0]
         n_pixels = pixels.shape[0]
@@ -89,19 +90,22 @@ class CPUMatrixRenderer:
             axis=1
         )
 
-        print("coeff calculated.")
-
         coeff_A = Helper.make_block_diagonal(coeff_A, 3)
+
+        coeff_A = coeff_A.tocsc()
 
         print(f"coeff_A: {coeff_A.shape}")
         print(f"coeff_B: {coeff_B.shape}")
 
-        print("solving ...")
-        # solution = lsqr(coeff_A, coeff_B)
-        # solution = solution[0]
-        # solution = solution.reshape(n_pixels * n_triangles, 3)
+        t_start = time.time()
+        print(f"{t_start}: start solving ...")
         solver = splu(coeff_A)
         solution = solver.solve(coeff_B)
+        t_finish = time.time()
+        print(f"{t_finish}: solved.")
+        t_delta = t_finish - t_start
+        print(f"time consume: {t_delta}")
+
         solution = solution.reshape(n_pixels * n_triangles, 3)
 
         zs = solution[:, 0]
@@ -124,8 +128,6 @@ class CPUMatrixRenderer:
         )
 
         selectors = np.any(selectors, axis=1)
-
-        print("solved.")
 
         image = np.zeros(
             shape=(n_pixels, 1,),
