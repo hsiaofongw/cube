@@ -11,7 +11,7 @@ fig = plt.figure()
 # ax = fig.add_subplot(111, projection='3d')
 
 cube_center = np.array([10, 0, 0])
-edge_length = 3
+edge_length = 3.2
 cube = Cube(cube_center, edge_length)
 cube.rotate(
     np.array([0, 0, 1]),
@@ -41,10 +41,10 @@ canvas = Canvas(
 horizon = np.array([0, -1, 0])
 canvas.set_horizon(horizon)
 
-angles_h = np.radians(np.array([-30, 30]))
-angles_v = np.radians(np.array([-20, 20]))
-img_width = 300
-img_height = 200
+angles_h = np.radians(np.array([-40, 40]))
+angles_v = np.radians(np.array([-30, 30]))
+img_width = 1200
+img_height = 900
 pixels = canvas.get_pixel_points(
     angles_h,
     angles_v,
