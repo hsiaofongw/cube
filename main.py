@@ -133,4 +133,4 @@ for i in range(image.shape[0]):
             image[i, j] = 1
 
 plt.imshow(image)
-plt.show()
+plt.savefig('cube.png')
