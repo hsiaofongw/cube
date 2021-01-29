@@ -30,8 +30,8 @@ class Scenario1:
 
         angles_h = np.radians(np.array([-29, 29]))
         angles_v = np.radians(np.array([-25, 25]))
-        img_width = 80
-        img_height = 60
+        img_width = 400
+        img_height = 300
         pixels = canvas.get_pixel_points(
             angles_h,
             angles_v,

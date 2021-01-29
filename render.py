@@ -3,7 +3,7 @@ from cube import Cube
 import numpy as np
 from helper import Helper
 from tqdm import tqdm
-from scipy.sparse.linalg import lsqr
+from scipy.sparse.linalg import lsqr, splu
 
 class SimpleRenderer:
 
@@ -93,13 +93,37 @@ class CPUMatrixRenderer:
 
         coeff_A = Helper.make_block_diagonal(coeff_A, 3)
 
+        print(f"coeff_A: {coeff_A.shape}")
+        print(f"coeff_B: {coeff_B.shape}")
+
         print("solving ...")
-        solution = lsqr(coeff_A, coeff_B)
+        # solution = lsqr(coeff_A, coeff_B)
+        # solution = solution[0]
+        # solution = solution.reshape(n_pixels * n_triangles, 3)
+        solver = splu(coeff_A)
+        solution = solver.solve(coeff_B)
         solution = solution.reshape(n_pixels * n_triangles, 3)
 
         zs = solution[:, 0]
         xs = solution[:, 1]
         ys = solution[:, 2]
+
+        zs = zs.reshape(n_pixels, n_triangles)
+        xs = xs.reshape(n_pixels, n_triangles)
+        ys = ys.reshape(n_pixels, n_triangles)
+
+        selectors = np.logical_and(
+            zs > 0,
+            np.logical_and(
+                xs + ys <= 1,
+                np.logical_and(
+                    xs >= 0,
+                    ys >= 0
+                )
+            )
+        )
+
+        selectors = np.any(selectors, axis=1)
 
         print("solved.")
 
@@ -108,17 +132,7 @@ class CPUMatrixRenderer:
             dtype=np.int
         )
 
-        image[
-            np.logical_and(
-                zs > 0,
-                np.logical_and(
-                    xs + ys <= 1,
-                    np.logical_and(
-                        xs >= 0,
-                        ys >= 0
-                    )
-                )
-            )
-        ] = 1
+        image[selectors] = 1
 
         return image
+
