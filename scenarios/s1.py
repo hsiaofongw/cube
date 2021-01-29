@@ -29,9 +29,9 @@ class Scenario1:
         canvas.set_horizon(horizon)
 
         angles_h = np.radians(np.array([-29, 29]))
-        angles_v = np.radians(np.array([-21, 21]))
-        img_width = 228
-        img_height = 171
+        angles_v = np.radians(np.array([-25, 25]))
+        img_width = 160
+        img_height = 120
         pixels = canvas.get_pixel_points(
             angles_h,
             angles_v,

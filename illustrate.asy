@@ -1,6 +1,6 @@
 settings.outformat = "pdf";
 settings.prc = false;
-settings.render = 8;
+settings.render = 48;
 import three;
 
 unitsize(1cm);
@@ -62,7 +62,7 @@ triple cube_corner_1 = cube_center + 0.5 * edge_length * (X+Y+Z);
 
 path3[] cube = box(cube_corner_0, cube_corner_1);
 
-triple example_point = cube_center - 0.5 * edge_length * X + 0.25 * Z;
+triple example_point = cube_center - 0.5 * edge_length * X + 0.34 * Z + 0.40 * Y;
 dot(example_point);
 draw(camera -- example_point, arrow=Arrow3());
 

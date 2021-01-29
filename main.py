@@ -19,10 +19,10 @@ image = renderer.render(
     pixels, 
     points_a, 
     points_b, 
-    points_c, 
-    img_width, 
-    img_height
+    points_c
 )
+
+image = image.reshape(img_height, img_width)
 
 plt.imshow(image)
 plt.savefig('cube.png')
