@@ -1,4 +1,4 @@
-from render import SimpleRenderer
+from render import SimpleRenderer, CPUMatrixRenderer
 import matplotlib.pyplot as plt
 from scenarios.s1 import Scenario1
 
@@ -13,8 +13,10 @@ pixels, \
 img_width, \
 img_height = scene1.get()
 
-renderer = SimpleRenderer()
-image = renderer.render(
+simple_renderer = SimpleRenderer()
+matrix_renderer = CPUMatrixRenderer()
+
+image = matrix_renderer.render(
     camera, 
     pixels, 
     points_a, 
