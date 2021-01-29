@@ -23,12 +23,12 @@ class Cube:
         edge_length: float
     ) -> None:
         
-        self.cube_center = cube_center
+        self.cube_center = cube_center.astype(np.float)
         self.edge_length = edge_length
         
-        vec_i = np.array([1, 0, 0])
-        vec_j = np.array([0, 1, 0])
-        vec_k = np.array([0, 0, 1])
+        vec_i = np.array([1, 0, 0], dtype=np.float)
+        vec_j = np.array([0, 1, 0], dtype=np.float)
+        vec_k = np.array([0, 0, 1], dtype=np.float)
         
         h_vec_i = 0.5 * edge_length * vec_i
         h_vec_j = 0.5 * edge_length * vec_j
@@ -49,10 +49,6 @@ class Cube:
             axis=0
         )
         
-        self.vec_i = vec_i
-        self.vec_j = vec_j
-        self.vec_k = vec_k
-    
     def move(self, replacement: np.ndarray) -> None:
         self.cube_vertices += replacement
         self.cube_center += replacement
