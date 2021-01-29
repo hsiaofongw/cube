@@ -16,15 +16,22 @@ img_height = scene1.get()
 simple_renderer = SimpleRenderer()
 matrix_renderer = CPUMatrixRenderer()
 
-image = matrix_renderer.render(
+image1 = matrix_renderer.render(
     camera, 
     pixels, 
     points_a, 
     points_b, 
     points_c
 )
+image1 = image1.reshape(img_height, img_width)
+plt.imsave('image1.png', image1)
 
-image = image.reshape(img_height, img_width)
-
-plt.imshow(image)
-plt.savefig('cube.png')
+image2 = simple_renderer.render(
+    camera,
+    pixels,
+    points_a,
+    points_b,
+    points_c
+)
+image2 = image2.reshape(img_height, img_width)
+plt.imsave('image2.png', image2)

@@ -27,6 +27,9 @@ class SimpleRenderer:
         vecs_ab = points_b - points_a
         vecs_ac = points_c - points_a
         camera = camera.T
+
+        t_start = time.time()
+        print(f"{t_start}: start rendering ...")
         for k in tqdm(range(pixel_points.shape[0])):
             for l in range(points_a.shape[0]):
                 v = view_directions[k:(k+1), :].T
@@ -49,6 +52,11 @@ class SimpleRenderer:
                 if (z > 0) and (x + y <= 1) and (x >= 0) and (y >= 0):
                     image[k] = 1
                     break
+        
+        t_finish = time.time()
+        t_delta = t_finish - t_start
+        print(f"{t_finish}: render completed.")
+        print(f"time consume: {t_delta}")
         
         return image
 
