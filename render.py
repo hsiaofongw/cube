@@ -2,7 +2,8 @@ import numpy as np
 from helper import Helper
 from tqdm import tqdm
 import time
-from solver import LUMultipleEquationsSolver
+from solver import LUMultipleEquationsSolver 
+from solver import CUDAMultipleEquationsSolver
 
 class SimpleIntegrator:
 
@@ -121,6 +122,45 @@ class CPUMatrixRenderer:
         print(f"{t_start}: rendering ...")
 
         solver = LUMultipleEquationsSolver()
+        solution = solver.solve(coeff_A, coeff_B)
+
+        t_finish = time.time()
+        print(f"{t_finish}: done.")
+        t_delta = t_finish - t_start
+        print(f"time consume: {t_delta}")
+        
+        integrator = SimpleIntegrator()
+        image = integrator.integrate(
+            solution, pixels.shape[0], points_a.shape[0]
+        )
+
+        return image
+
+
+class CUDARenderer:
+
+    def render(
+        self,
+        camera: np.ndarray,
+        pixels: np.ndarray,
+        points_a: np.ndarray,
+        points_b: np.ndarray,
+        points_c: np.ndarray
+    ) -> np.ndarray:
+
+        coeff_A, coeff_B = Helper.make_coefficients(
+            camera, 
+            pixels, 
+            points_a, 
+            points_b, 
+            points_c
+        )
+
+        t_start = time.time()
+        print("in GPU:")
+        print(f"{t_start}: rendering ...")
+
+        solver = CUDAMultipleEquationsSolver()
         solution = solver.solve(coeff_A, coeff_B)
 
         t_finish = time.time()
