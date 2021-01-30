@@ -74,32 +74,15 @@ class CPUMatrixRenderer:
 
         print("constructing coefficients matrices ...")
 
-        n_triangles = points_a.shape[0]
-        n_pixels = pixels.shape[0]
-
-        vecs_ab = points_b - points_a
-        vecs_ac = points_c - points_a
-
-        views = pixels - camera
-        views = np.repeat(views, repeats=n_triangles, axis=0)
-
-        points_a = np.tile(points_a, reps=(n_pixels, 1,))
-        vecs_ab = np.tile(vecs_ab, reps=(n_pixels, 1,))
-        vecs_ac = np.tile(vecs_ac, reps=(n_pixels, 1,))
-
-        coeff_B = np.atleast_2d(camera) - points_a
-        coeff_B = coeff_B.flatten(order='C')
-
-        views = np.atleast_2d(views.flatten(order='C')).T
-        vecs_ab = np.atleast_2d(vecs_ab.flatten(order='C')).T
-        vecs_ac = np.atleast_2d(vecs_ac.flatten(order='C')).T
-        coeff_A = np.concatenate(
-            (-views, vecs_ab, vecs_ac,),
-            axis=1
+        coeff_A, coeff_B = Helper.make_coefficients(
+            camera, 
+            pixels, 
+            points_a, 
+            points_b, 
+            points_c
         )
 
         coeff_A = Helper.make_block_diagonal(coeff_A, 3)
-
         coeff_A = coeff_A.tocsc()
 
         print(f"coeff_A: {coeff_A.shape}")
@@ -114,6 +97,8 @@ class CPUMatrixRenderer:
         t_delta = t_finish - t_start
         print(f"time consume: {t_delta}")
 
+        n_pixels = pixels.shape[0]
+        n_triangles = points_a.shape[0]
         solution = solution.reshape(n_pixels * n_triangles, 3)
 
         zs = solution[:, 0]

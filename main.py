@@ -26,12 +26,12 @@ image1 = matrix_renderer.render(
 image1 = image1.reshape(img_height, img_width)
 plt.imsave('image1.png', image1)
 
-image2 = simple_renderer.render(
-    camera,
-    pixels,
-    points_a,
-    points_b,
-    points_c
-)
-image2 = image2.reshape(img_height, img_width)
-plt.imsave('image2.png', image2)
+# image2 = simple_renderer.render(
+#     camera,
+#     pixels,
+#     points_a,
+#     points_b,
+#     points_c
+# )
+# image2 = image2.reshape(img_height, img_width)
+# plt.imsave('image2.png', image2)

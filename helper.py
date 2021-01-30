@@ -1,4 +1,5 @@
 import numpy as np
+from numpy.lib.twodim_base import tri
 from scipy.spatial.transform import Rotation as R
 from math import sin, cos, floor
 from scipy.spatial.distance import cosine as cosine_distance
@@ -216,3 +217,91 @@ class Helper:
         data = np.reshape(data, newshape=(data.shape[0]*data.shape[1],))
 
         return csr_matrix((data, indices, indptr,))
+
+    @classmethod 
+    def make_coefficients(
+        cls,
+        camera: np.ndarray,
+        pixels: np.ndarray,
+        points_a: np.ndarray,
+        points_b: np.ndarray,
+        points_c: np.ndarray
+    ) -> Tuple[np.ndarray, np.ndarray]:
+
+        n_triangles = points_a.shape[0]
+        n_pixels = pixels.shape[0]
+
+        vecs_ab = points_b - points_a
+        vecs_ac = points_c - points_a
+
+        views = pixels - camera
+        views = np.repeat(views, repeats=n_triangles, axis=0)
+
+        points_a = np.tile(points_a, reps=(n_pixels, 1,))
+        vecs_ab = np.tile(vecs_ab, reps=(n_pixels, 1,))
+        vecs_ac = np.tile(vecs_ac, reps=(n_pixels, 1,))
+
+        coeff_B = np.atleast_2d(camera) - points_a
+        coeff_B = coeff_B.flatten(order='C')
+
+        views = np.atleast_2d(views.flatten(order='C')).T
+        vecs_ab = np.atleast_2d(vecs_ab.flatten(order='C')).T
+        vecs_ac = np.atleast_2d(vecs_ac.flatten(order='C')).T
+        coeff_A = np.concatenate(
+            (-views, vecs_ab, vecs_ac,),
+            axis=1
+        )
+
+        return (coeff_A, coeff_B,)
+    
+    @classmethod
+    def export_render_task(
+        cls,
+        camera: np.ndarray,
+        pixels: np.ndarray,
+        points_a: np.ndarray,
+        points_b: np.ndarray,
+        points_c: np.ndarray,
+        pixels_file_path: str,
+        triangles_file_path: str
+    ) -> None:
+
+        camera = np.atleast_2d(camera)
+        camera_and_pixels = np.concatenate(
+            (camera, pixels,),
+            axis = 0
+        )
+
+        triangles = np.concatenate(
+            (points_a, points_b, points_c,),
+            axis = 1
+        )
+
+        np.savetxt(pixels_file_path, camera_and_pixels, delimiter=',')
+        np.savetxt(triangles_file_path, triangles, delimiter=',')
+    
+    @classmethod
+    def load_render_task(
+        cls,
+        pixels_file_path: str,
+        triangles_file_path: str
+    ) -> Tuple[
+        np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray
+    ]:
+
+        camera_and_pixels = np.loadtxt(pixels_file_path, delimiter=',')
+        triangles = np.loadtxt(triangles_file_path, delimiter=',')
+
+        camera = camera_and_pixels[0, :]
+        pixels = camera_and_pixels[1:, :]
+        points_a = triangles[:, 0:3]
+        points_b = triangles[:, 3:6]
+        points_c = triangles[:, 6:9]
+
+        return (
+            camera,
+            pixels,
+            points_a,
+            points_b,
+            points_c,
+        )
