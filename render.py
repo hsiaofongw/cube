@@ -1,10 +1,47 @@
-from canvas import Canvas
-from cube import Cube
 import numpy as np
 from helper import Helper
 from tqdm import tqdm
-from scipy.sparse.linalg import splu
 import time
+from solver import LUMultipleEquationsSolver
+
+class SimpleIntegrator:
+
+    def integrate(
+        self, 
+        solution: np.ndarray,
+        n_pixels: int,
+        n_triangles: int
+    ) -> np.ndarray:
+
+        solution = solution.reshape(n_pixels * n_triangles, 3)
+
+        zs = solution[:, 0]
+        xs = solution[:, 1]
+        ys = solution[:, 2]
+
+        zs = zs.reshape(n_pixels, n_triangles)
+        xs = xs.reshape(n_pixels, n_triangles)
+        ys = ys.reshape(n_pixels, n_triangles)
+
+        selectors = np.logical_and(
+            zs > 0,
+            np.logical_and(
+                xs + ys <= 1,
+                np.logical_and(
+                    xs >= 0,
+                    ys >= 0
+                )
+            )
+        )
+        selectors = np.any(selectors, axis=1)
+
+        image = np.zeros(
+            shape=(n_pixels, 1,),
+            dtype=np.int
+        )
+        image[selectors] = 1
+
+        return image
 
 class SimpleRenderer:
 
@@ -72,8 +109,6 @@ class CPUMatrixRenderer:
         points_c: np.ndarray
     ) -> np.ndarray:
 
-        print("constructing coefficients matrices ...")
-
         coeff_A, coeff_B = Helper.make_coefficients(
             camera, 
             pixels, 
@@ -82,52 +117,20 @@ class CPUMatrixRenderer:
             points_c
         )
 
-        coeff_A = Helper.make_block_diagonal(coeff_A, 3)
-        coeff_A = coeff_A.tocsc()
-
-        print(f"coeff_A: {coeff_A.shape}")
-        print(f"coeff_B: {coeff_B.shape}")
-
         t_start = time.time()
-        print(f"{t_start}: start solving ...")
-        solver = splu(coeff_A)
-        solution = solver.solve(coeff_B)
+        print(f"{t_start}: rendering ...")
+
+        solver = LUMultipleEquationsSolver()
+        solution = solver.solve(coeff_A, coeff_B)
+
         t_finish = time.time()
-        print(f"{t_finish}: solved.")
+        print(f"{t_finish}: done.")
         t_delta = t_finish - t_start
         print(f"time consume: {t_delta}")
-
-        n_pixels = pixels.shape[0]
-        n_triangles = points_a.shape[0]
-        solution = solution.reshape(n_pixels * n_triangles, 3)
-
-        zs = solution[:, 0]
-        xs = solution[:, 1]
-        ys = solution[:, 2]
-
-        zs = zs.reshape(n_pixels, n_triangles)
-        xs = xs.reshape(n_pixels, n_triangles)
-        ys = ys.reshape(n_pixels, n_triangles)
-
-        selectors = np.logical_and(
-            zs > 0,
-            np.logical_and(
-                xs + ys <= 1,
-                np.logical_and(
-                    xs >= 0,
-                    ys >= 0
-                )
-            )
+        
+        integrator = SimpleIntegrator()
+        image = integrator.integrate(
+            solution, pixels.shape[0], points_a.shape[0]
         )
-
-        selectors = np.any(selectors, axis=1)
-
-        image = np.zeros(
-            shape=(n_pixels, 1,),
-            dtype=np.int
-        )
-
-        image[selectors] = 1
 
         return image
-
