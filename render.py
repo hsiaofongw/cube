@@ -1,3 +1,4 @@
+from canvas import Canvas
 import numpy as np
 from helper import Helper
 from tqdm import tqdm
@@ -47,14 +48,16 @@ class SimpleRenderer:
 
     def render(
         self,
-        camera: np.ndarray,
-        pixel_points: np.ndarray,
-        points_a: np.ndarray,
-        points_b: np.ndarray,
-        points_c: np.ndarray,
+        canvas: Canvas,
+        triangles: np.ndarray
     ):
-        camera = np.atleast_2d(camera)
+        camera = canvas.camera
+        pixel_points = canvas.get_pixel_points()
         view_directions = pixel_points - camera
+
+        points_a: np.ndarray = triangles[:, 0:3]
+        points_b: np.ndarray = triangles[:, 3:6]
+        points_c: np.ndarray = triangles[:, 6:9]
 
         image = np.zeros(
             shape=(pixel_points.shape[0],),
@@ -102,18 +105,21 @@ class CPUMatrixRenderer:
 
     def render(
         self,
-        camera: np.ndarray,
-        pixels: np.ndarray,
-        points_a: np.ndarray,
-        points_b: np.ndarray,
-        points_c: np.ndarray
+        canvas: Canvas,
+        triangles: np.ndarray
     ) -> np.ndarray:
 
+        points_a = triangles[:, 0:3]
+        points_b = triangles[:, 3:6]
+        points_c = triangles[:, 6:9]
+
+        pixels = canvas.get_pixel_points()
+
         coeff_A, coeff_B = Helper.make_coefficients(
-            camera, 
-            pixels, 
-            points_a, 
-            points_b, 
+            canvas.camera,
+            pixels,
+            points_a,
+            points_b,
             points_c
         )
 
@@ -128,9 +134,11 @@ class CPUMatrixRenderer:
         t_delta = t_finish - t_start
         print(f"time consume: {t_delta}")
         
+        n_pixels = pixels.shape[0]
+        n_triangles = triangles.shape[0]
         integrator = SimpleIntegrator()
         image = integrator.integrate(
-            solution, pixels.shape[0], points_a.shape[0]
+            solution, n_pixels, n_triangles
         )
 
         return image

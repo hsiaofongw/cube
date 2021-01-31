@@ -1,10 +1,11 @@
 from canvas import Canvas
 from cube import Cube
 import numpy as np
+from typing import Tuple
 
 class Scenario1:
 
-    def get(self):
+    def get(self) -> Tuple[Canvas, np.ndarray]:
 
         cube_center = np.array([10, 0, 0])
         edge_length = 3.2
@@ -30,27 +31,12 @@ class Scenario1:
 
         angles_h = np.radians(np.array([-29, 29]))
         angles_v = np.radians(np.array([-25, 25]))
+        canvas.set_angles(angles_h, angles_v)
+
         img_width = 600
         img_height = 400
-        pixels = canvas.get_pixel_points(
-            angles_h,
-            angles_v,
-            img_width,
-            img_height
-        )
+        canvas.set_pixels_size(img_width, img_height)
 
-        camera = np.atleast_2d(camera)
-        view_directions = pixels - camera
+        triangles = cube.get_triangles()
 
-        points_a, points_b, points_c = cube.get_facades()
-
-        return (
-            camera,
-            view_directions,
-            points_a,
-            points_b,
-            points_c,
-            pixels,
-            img_width,
-            img_height
-        )
+        return (canvas, triangles,)

@@ -92,7 +92,7 @@ class Cube:
             [7, 4, 8]
         ]) - 1
     
-    def get_facades(self) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    def get_triangles(self) -> np.ndarray:
 
         vertexes = self.cube_vertices
         triangle_indexes = self.get_facades_indexes()
@@ -108,8 +108,10 @@ class Cube:
             points_b[i, :] = vertexes[point_b_ind, :]
             points_c[i, :] = vertexes[point_c_ind, :]
 
-        
-        return (points_a, points_b, points_c,)
+        return np.concatenate(
+            (points_a, points_b, points_c,),
+            axis=1
+        )
     
     def get_edge_lengths(self) -> np.ndarray:
         edge_lengths = np.zeros(shape=(12,), dtype=np.float)
